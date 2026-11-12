@@ -17,10 +17,6 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
     private lateinit var txtFps: TextView
     private var frameCount = 0
     private var lastTimeNanos = 0L
-    private var initialX = 0
-    private var initialY = 0
-    private var initialTouchX = 0f
-    private var initialTouchY = 0f
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -36,12 +32,11 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
             WindowManager.LayoutParams.TYPE_PHONE
         }
 
-        // Permitimos foco aqui para que os botões e switches do painel respondam aos cliques
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             layoutType,
-            0, // Removido FLAG_NOT_FOCUSABLE para permitir interação com o menu
+            0,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -55,24 +50,22 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
         val swEspLine = floatingView.findViewById<Switch>(R.id.swEspLine)
         val swEspBox = floatingView.findViewById<Switch>(R.id.swEspBox)
 
-        // Ao clicar na bolha fechada, esconde a bolha e MOSTRA O PAINEL DE CONFIGURAÇÕES
         collapsedBubble.setOnClickListener {
             collapsedBubble.visibility = View.GONE
             expandedPanel.visibility = View.VISIBLE
         }
 
-        // Botão para fechar o painel e voltar para a bolha
         btnMinimize.setOnClickListener {
             expandedPanel.visibility = View.GONE
             collapsedBubble.visibility = View.VISIBLE
         }
 
         swEspLine.setOnCheckedChangeListener { _, isChecked ->
-            swEspLine.text = if (isChecked) "ESP Linha [ATIVO - DEMO]" else "ESP Linha (Demo UI)"
+            swEspLine.text = if (isChecked) "ESP Linha [ATIVO]" else "ESP Linha (Demo)"
         }
 
         swEspBox.setOnCheckedChangeListener { _, isChecked ->
-            swEspBox.text = if (isChecked) "ESP Caixa [ATIVO - DEMO]" else "ESP Caixa (Demo UI)"
+            swEspBox.text = if (isChecked) "ESP Caixa [ATIVO]" else "ESP Caixa (Demo)"
         }
 
         windowManager.addView(floatingView, params)
@@ -85,7 +78,7 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
         } else {
             frameCount++
             if (frameTimeNanos - lastTimeNanos >= 1_000_000_000L) {
-                txtFps.text = "IBIS | FPS: $frameCount"
+                txtFps.text = "IBIS | $frameCount FPS"
                 frameCount = 0
                 lastTimeNanos = frameTimeNanos
             }
