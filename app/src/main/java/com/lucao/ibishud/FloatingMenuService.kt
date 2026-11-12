@@ -32,7 +32,6 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
             WindowManager.LayoutParams.TYPE_PHONE
         }
 
-        // Usamos FLAG_NOT_FOCUSABLE na bolha e gerenciamos o foco dinamicamente para não travar o celular
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -50,21 +49,19 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
         val btnMinimize = floatingView.findViewById<TextView>(R.id.btnMinimize)
         val swEspLine = floatingView.findViewById<Switch>(R.id.swEspLine)
         val swEspBox = floatingView.findViewById<Switch>(R.id.swEspBox)
+        val swHeadshot = floatingView.findViewById<Switch>(R.id.swHeadshot)
+        val swInjector = floatingView.findViewById<Switch>(R.id.swInjector)
 
         collapsedBubble.setOnClickListener {
-            // Permite foco temporário apenas quando o painel abre para interagir com os botões
             params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
             windowManager.updateViewLayout(floatingView, params)
-            
             collapsedBubble.visibility = View.GONE
             expandedPanel.visibility = View.VISIBLE
         }
 
         btnMinimize.setOnClickListener {
-            // Retira o foco para liberar totalmente o toque do celular e as notificações
             params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
             windowManager.updateViewLayout(floatingView, params)
-
             expandedPanel.visibility = View.GONE
             collapsedBubble.visibility = View.VISIBLE
         }
@@ -75,6 +72,14 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
 
         swEspBox.setOnCheckedChangeListener { _, isChecked ->
             swEspBox.text = if (isChecked) "ESP Caixa [ATIVO]" else "ESP Caixa (Demo)"
+        }
+
+        swHeadshot.setOnCheckedChangeListener { _, isChecked ->
+            swHeadshot.text = if (isChecked) "Puxar Capa [LIGADO]" else "Puxar Capa (Aim Assist)"
+        }
+
+        swInjector.setOnCheckedChangeListener { _, isChecked ->
+            swInjector.text = if (isChecked) "Injetor FF [INJETADO]" else "Injetor FF (Módulo)"
         }
 
         windowManager.addView(floatingView, params)
