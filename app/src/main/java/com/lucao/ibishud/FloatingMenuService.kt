@@ -9,6 +9,7 @@ import android.view.*
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
+import android.view.Choreographer
 
 class FloatingMenuService : Service(), Choreographer.FrameCallback {
     private lateinit var windowManager: WindowManager
@@ -35,11 +36,12 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
             WindowManager.LayoutParams.TYPE_PHONE
         }
 
+        // Permitimos foco aqui para que os botões e switches do painel respondam aos cliques
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             layoutType,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            0, // Removido FLAG_NOT_FOCUSABLE para permitir interação com o menu
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -53,11 +55,13 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
         val swEspLine = floatingView.findViewById<Switch>(R.id.swEspLine)
         val swEspBox = floatingView.findViewById<Switch>(R.id.swEspBox)
 
+        // Ao clicar na bolha fechada, esconde a bolha e MOSTRA O PAINEL DE CONFIGURAÇÕES
         collapsedBubble.setOnClickListener {
             collapsedBubble.visibility = View.GONE
             expandedPanel.visibility = View.VISIBLE
         }
 
+        // Botão para fechar o painel e voltar para a bolha
         btnMinimize.setOnClickListener {
             expandedPanel.visibility = View.GONE
             collapsedBubble.visibility = View.VISIBLE
@@ -69,25 +73,6 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
 
         swEspBox.setOnCheckedChangeListener { _, isChecked ->
             swEspBox.text = if (isChecked) "ESP Caixa [ATIVO - DEMO]" else "ESP Caixa (Demo UI)"
-        }
-
-        collapsedBubble.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    initialX = params.x
-                    initialY = params.y
-                    initialTouchX = event.rawX
-                    initialTouchY = event.rawY
-                    true
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    params.x = initialX + (event.rawX - initialTouchX).toInt()
-                    params.y = initialY + (event.rawY - initialTouchY).toInt()
-                    windowManager.updateViewLayout(floatingView, params)
-                    true
-                }
-                else -> false
-            }
         }
 
         windowManager.addView(floatingView, params)
