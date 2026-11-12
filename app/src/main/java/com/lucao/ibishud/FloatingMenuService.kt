@@ -32,11 +32,12 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
             WindowManager.LayoutParams.TYPE_PHONE
         }
 
+        // Usamos FLAG_NOT_FOCUSABLE na bolha e gerenciamos o foco dinamicamente para não travar o celular
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             layoutType,
-            0,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -51,11 +52,19 @@ class FloatingMenuService : Service(), Choreographer.FrameCallback {
         val swEspBox = floatingView.findViewById<Switch>(R.id.swEspBox)
 
         collapsedBubble.setOnClickListener {
+            // Permite foco temporário apenas quando o painel abre para interagir com os botões
+            params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+            windowManager.updateViewLayout(floatingView, params)
+            
             collapsedBubble.visibility = View.GONE
             expandedPanel.visibility = View.VISIBLE
         }
 
         btnMinimize.setOnClickListener {
+            // Retira o foco para liberar totalmente o toque do celular e as notificações
+            params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+            windowManager.updateViewLayout(floatingView, params)
+
             expandedPanel.visibility = View.GONE
             collapsedBubble.visibility = View.VISIBLE
         }
